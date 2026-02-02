@@ -9,7 +9,10 @@ TBD
 ## Project Structure
 ```bash
 nba-models/
-├── 00_acquire_data.py
+├── code
+│   ├── bball_ref.py
+│   ├── 00_past_szn.py
+│   ├── 01_current_szn.py
 ├── data
 │   ├── 1975
 │   │   ├── adv_team_stats.csv
@@ -19,15 +22,25 @@ nba-models/
 │   │   ├── plyr_per_game.csv
 │   │   └── team_per_game.csv
 │   ├── ...
-│   │
-│   └── 2025
-│       ├── adv_team_stats.csv
-│       ├── mvp.csv
-│       ├── opp_team_per_game.csv
-│       ├── plyr_advanced.csv
-│       ├── plyr_per_game.csv
-│       └── team_per_game.csv
-├── run_00_acquire_data.yaml
+│   ├── 2025
+│   │   ├── adv_team_stats.csv
+│   │   ├── mvp.csv
+│   │   ├── opp_team_per_game.csv
+│   │   ├── plyr_advanced.csv
+│   │   ├── plyr_per_game.csv
+│   │   └── team_per_game.csv
+│   └── 2026
+│       └── 2026-02-02
+│           ├── adv_team_stats.csv
+│           ├── opp_team_per_game.csv
+│           ├── plyr_advanced.csv
+│           ├── plyr_per_game.csv
+│           └── team_per_game.csv
+│       └── ...
+├── .github
+│   └── workflows
+│       ├── run_00_acquire_data.yaml
+│       └── run_00_acquire_data.yaml
 ├── pyproject.toml
 ├── README.md
 └── uv.lock
