@@ -2,7 +2,7 @@ name: Run 01_current_szn.py
 
 on:
   schedule:
-    - cron: '0 6 * * *' #every morning 6AM
+    - cron: '0 14 * * *' #every morning 6AM PT
   workflow_dispatch:
 
 permissions:
