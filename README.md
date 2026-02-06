@@ -1,6 +1,6 @@
 # NBA ML Prediction Modeling
 
-A model generating MVP predictions and team playoff success using historical data (1975-previous season) from Basketball Reference.
+(In development) A model generating MVP predictions and team playoff success using historical data (1975-previous season) from Basketball Reference.
 
 ## Overview
 
@@ -40,7 +40,7 @@ nba-models/
 ├── .github
 │   └── workflows
 │       ├── run_00_acquire_data.yaml
-│       └── run_00_acquire_data.yaml
+│       └── run_01_current_szn.yaml
 ├── pyproject.toml
 ├── README.md
 └── uv.lock
