@@ -10,3 +10,7 @@ wheels/
 .venv
 
 notes.txt
+prac.py
+test.py
+other/
+03_modeling.py

@@ -6,7 +6,7 @@ from bball_ref import get_data
 
 ##########################################################################
 
-#this file will be run once per day (~6 AM) to capture changes to the data from previous day's games
+#this file will be run once per week (~6 AM Monday mornings) to capture changes to the data from previous week's games
 
 ##########################################################################
 

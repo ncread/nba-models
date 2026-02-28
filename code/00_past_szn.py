@@ -11,7 +11,7 @@ from bball_ref import get_data
 
 ##########################################################################
 
-year_list = list(range(1975, date.today().year + 1)) #to include this year's data (runs on 07/01)
+year_list = list(range(1980, date.today().year + 1)) #to include this year's data (runs on 07/01)
 # year_list = list(range(1975, date.today().year)) #generates all dataframes
 
 def make_directory(folder_name):
