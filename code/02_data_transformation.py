@@ -134,7 +134,11 @@ past_df_list = []
 
 #looping through data directory folders
 for year_dir in data_dir.iterdir():
-    print(f'Starting {str(year_dir)[-4:]} processing.', end=' ')
+
+    if year_dir.is_dir(): # check to ensure iteration skips /data/df.csv file to avoid failure
+        print(f'Starting {str(year_dir)[-4:]} processing.', end=' ')
+    else:
+        continue
 
     if str(year_dir) == current_szn_dir:
         df = feature_trans(year_dir, True)

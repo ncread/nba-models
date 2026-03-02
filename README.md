@@ -1,5 +1,7 @@
 # NBA ML Prediction Modeling
 
+[![Run 01_current_szn.py](https://github.com/ncread/nba-models/actions/workflows/run_01_02_files.yaml/badge.svg)](https://github.com/ncread/nba-models/actions/workflows/run_01_02_files.yaml)
+
 (In development) A model generating NBA MVP standings predictions using historical data (1980-previous season) from Basketball Reference. Data for the current season is acquired weekly (Monday AM) and fed into machine learning models trained on the MVP results from previous seasons.
 
 ## Overview
