@@ -167,6 +167,15 @@ for year_dir in data_dir.iterdir():
     df.to_csv(f'{year_dir}/df.csv') #contains all plyr and team features of interest, plus mvp voter share
     print(f'Successfully saved dataframe for {str(year_dir)[-4:]}')
 
-df_concat = df_concatenation(past_df_list)
-df_concat.to_csv(f'{data_dir}/df.csv')
-print(f'Successfully concatenated dataframes from finished seasons: {data_dir}/df.csv')
+if len(past_df_list) > 0:
+    df_concat_new = df_concatenation(past_df_list)
+
+    #read in existing concatenated file
+    df_concat = pd.read_csv(f'{data_dir}/df.csv')
+
+    #concatenate existing years of data with new completed year(s) of data
+    df_concat = pd.concat(df_concat, df_concat_new)
+    df_concat.to_csv(f'{data_dir}/df.csv')
+    print(f'Successfully concatenated dataframes from finished seasons: {data_dir}/df.csv')
+else:
+    print(f'No changes. All past, completed seasons already concatenated within {data_dir}/df.csv')
