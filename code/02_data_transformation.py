@@ -122,7 +122,7 @@ team_abb_dict = {
     'WSB': 'Washington Bullets',  # Became WAS in 1997
 }
 
-script_dir = Path(__file__).parent.resolve()
+script_dir = Path(__file__).parent.resolve() # /home/noah/Documents/projects/nba/code
 repo_dir = script_dir.parent
 data_dir = Path(repo_dir/'data')
 
@@ -135,16 +135,16 @@ past_df_list = []
 #looping through data directory folders
 for year_dir in data_dir.iterdir():
 
-    if year_dir.is_dir(): # check to ensure iteration skips /data/df.csv file to avoid failure
-        print(f'Starting {str(year_dir)[-4:]} processing.', end=' ')
-    else:
+    if not year_dir.is_dir():
+        print(f'***{year_dir.name}*** is not a directory. Skipping iteration...')
         continue
+    print(f'Starting {str(year_dir)[-4:]} processing.', end=' ')
 
     if str(year_dir) == current_szn_dir:
         df = feature_trans(year_dir, True)
         
     else:
-        # comment out next 3 lines & rerun if change has been made to dataframe construction
+        # comment out next 3 lines & rerun if a change has been made to how the dataframe is constructed
         if Path(f'{year_dir}/df.csv').is_file(): #move on to next year if df.csv already exists
             print(f'Dataframe has already been constructed for {str(year_dir)[-4:]}. Proceeding to the next year...')
             continue
@@ -176,6 +176,6 @@ if len(past_df_list) > 0:
     #concatenate existing years of data with new completed year(s) of data
     df_concat = pd.concat(df_concat, df_concat_new)
     df_concat.to_csv(f'{data_dir}/df.csv')
-    print(f'Successfully concatenated dataframes from finished seasons: {data_dir}/df.csv')
+    print(f'Successfully concatenated dataframes from finished seasons.')
 else:
     print(f'No changes. All past, completed seasons already concatenated within {data_dir}/df.csv')
