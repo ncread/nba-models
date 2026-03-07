@@ -134,6 +134,7 @@ past_df_list = []
 
 #looping through data directory folders
 for year_dir in data_dir.iterdir():
+    print(f'DEBUG >>> name={year_dir.name!r} | is_dir={year_dir.is_dir()} | isdigit={year_dir.name.isdigit()}')
 
     if not year_dir.is_dir() or not year_dir.name.isdigit():
         print(f'***{year_dir.name}*** is not a valid directory. Skipping...')
