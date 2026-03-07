@@ -1,4 +1,4 @@
-name: Run 01_current_szn.py
+name: 01_current_szn.py & 02_data_transformation.py
 
 on:
   schedule:

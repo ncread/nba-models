@@ -18,7 +18,7 @@ def feature_trans(year_dir: str, current_year_flag = False) -> pd.DataFrame:
     '''
 
     if current_year_flag:
-        print(f'{year_dir} is the current season directory. Grabbing the most recent weekly data...', end=' ')
+        print(f'{str(year_dir)[-4:]} is the current season. Grabbing the most recent weekly data...', end=' ')
         current_year_dir = Path(f'{year_dir}')
         weekly_subfolders = sorted([f for f in current_year_dir.iterdir() if f.is_dir()])
         most_recent = weekly_subfolders[-1] if weekly_subfolders else None
@@ -127,7 +127,7 @@ repo_dir = script_dir.parent
 data_dir = Path(repo_dir/'data')
 
 current_year = date.today().year
-current_szn_dir = f'{data_dir}/2026' #will be changed when new season begins
+current_szn_dir = data_dir/'2026' #will be changed when new season begins
 #############################
 
 past_df_list = []
@@ -138,9 +138,10 @@ for year_dir in data_dir.iterdir():
     if not year_dir.is_dir():
         print(f'***{year_dir.name}*** is not a directory. Skipping iteration...')
         continue
+
     print(f'Starting {str(year_dir)[-4:]} processing.', end=' ')
 
-    if str(year_dir) == current_szn_dir:
+    if year_dir == current_szn_dir:
         df = feature_trans(year_dir, True)
         
     else:
@@ -174,7 +175,7 @@ if len(past_df_list) > 0:
     df_concat = pd.read_csv(f'{data_dir}/df.csv')
 
     #concatenate existing years of data with new completed year(s) of data
-    df_concat = pd.concat(df_concat, df_concat_new)
+    df_concat = pd.concat([df_concat, df_concat_new])
     df_concat.to_csv(f'{data_dir}/df.csv')
     print(f'Successfully concatenated dataframes from finished seasons.')
 else:
