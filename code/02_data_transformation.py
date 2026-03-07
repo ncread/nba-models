@@ -135,8 +135,8 @@ past_df_list = []
 #looping through data directory folders
 for year_dir in data_dir.iterdir():
 
-    if not year_dir.is_dir():
-        print(f'***{year_dir.name}*** is not a directory. Skipping iteration...')
+    if not year_dir.is_dir() or not year_dir.name.isdigit():
+        print(f'***{year_dir.name}*** is not a valid directory. Skipping...')
         continue
 
     print(f'Starting {str(year_dir)[-4:]} processing.', end=' ')
