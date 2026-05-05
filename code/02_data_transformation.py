@@ -37,7 +37,7 @@ def feature_trans(year_dir: str, current_year_flag = False) -> pd.DataFrame:
     plyr_per_game['Stocks'] = round(plyr_per_game[['STL','BLK']].sum(axis=1), 3)
     plyr_avg_df = plyr_per_game[['Player','Team','G','Par','Stocks','eFG%']]
 
-    plyr_adv_df = plyr_advanced[['Player','Team','PER','TS%','WS','BPM','VORP']]
+    plyr_adv_df = plyr_advanced[['Player','Team','MP','PER','TS%','WS','BPM','VORP']]
 
     #merge two player dataframes
     plyr_merged = pd.merge(plyr_avg_df, plyr_adv_df, on=['Player','Team'], how='left')
@@ -134,7 +134,7 @@ past_df_list = []
 
 #looping through data directory folders
 for year_dir in data_dir.iterdir():
-    print(f'DEBUG >>> name={year_dir.name!r} | is_dir={year_dir.is_dir()} | isdigit={year_dir.name.isdigit()}')
+    # print(f'DEBUG >>> name={year_dir.name!r} | is_dir={year_dir.is_dir()} | isdigit={year_dir.name.isdigit()}')
 
     if not year_dir.is_dir() or not year_dir.name.isdigit():
         print(f'***{year_dir.name}*** is not a valid directory. Skipping...')
@@ -147,9 +147,9 @@ for year_dir in data_dir.iterdir():
         
     else:
         # comment out next 3 lines & rerun if a change has been made to how the dataframe is constructed
-        if Path(f'{year_dir}/df.csv').is_file(): #move on to next year if df.csv already exists
-            print(f'Dataframe has already been constructed for {str(year_dir)[-4:]}. Proceeding to the next year...')
-            continue
+        # if Path(f'{year_dir}/df.csv').is_file(): #move on to next year if df.csv already exists
+        #     print(f'Dataframe has already been constructed for {str(year_dir)[-4:]}. Proceeding to the next year...')
+        #     continue
 
         df = feature_trans(year_dir)
         mvp_df = format_mvp(f'{year_dir}/mvp.csv')
@@ -158,7 +158,8 @@ for year_dir in data_dir.iterdir():
         df = pd.merge(df, mvp_df, on=['Player','Team'], how='left')
         df['Share'] = df['Share'].fillna(0)
         df['Games_Played_PCT'] = round(df['G'] / df['Team_G'],4)
-        df['Award_eligible'] = np.where(df['Games_Played_PCT'] > (65/82), 1, 0)
+        df['Award_eligible'] = np.where((df['Games_Played_PCT'] > (60/82)) & (df['MP'] >= 2000), 1, 0) #there are exceptions for games played in lieu of a major injury (ex. Doncic, Cunningham in 2026)
+        # df['Award_eligible'] = np.where(df['MP'] >= 2000, 1, 0) 
         df = df[df['Award_eligible'] == 1]
         df = df.drop('Award_eligible', axis=1)
         past_df_list.append(f'{year_dir}/df.csv')
