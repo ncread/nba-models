@@ -14,15 +14,16 @@ repo_dir = script_dir.parent
 data_dir = Path(repo_dir/'data')
 
 current_year = date.today().year
-
+adjusted_year = (pd.Timestamp.now() + pd.DateOffset(months=3)).year #season starts in Oct, so this will initiate the "next" calendar year
+current_szn_dir = data_dir/f'{adjusted_year}'
 # ------------------------------------------------------------- #
 
-historical_df = pd.read_csv(f'{data_dir}/df.csv')
+historical_df = pd.read_csv(f'{data_dir}/concat_df.csv')
 design_matrix_feat = ['Par','Stocks','eFG%','PER','TS%','WS','BPM','VORP','Team_Win%']
 X = historical_df[design_matrix_feat] #design matrix
 y = historical_df['Share'] #prediction target
 
-current_df = pd.read_csv(f'{data_dir}/{current_year}/df.csv')
+current_df = pd.read_csv(f'{data_dir}/{adjusted_year}/df.csv')
 
 current_df['Games_Played_PCT'] = round(current_df['G'] / current_df['Team_G'],4)
 current_df = current_df[(current_df['Games_Played_PCT'] >= (0.75)) & (current_df['MP'] >= 1800)]
@@ -36,9 +37,10 @@ predicting_on_df = current_df[design_matrix_feat]
 dtree_reg = DecisionTreeRegressor(random_state=1)
 dtree_reg.fit(X, y)
 
-resulting_df = current_df
+resulting_df = current_df.copy()
 resulting_df['Predictions'] = dtree_reg.predict(predicting_on_df)
+resulting_df.sort_values('Predictions', ascending=False, inplace=True)
 
-# resulting_df.to_csv(f'{data_dir}/predictions_df.csv')
+resulting_df.to_csv(f'{data_dir}/{adjusted_year}/mvp_predictions.csv')
 
-print(resulting_df.sort_values('Predictions', ascending=False).head(20))
+print(resulting_df.head(20))

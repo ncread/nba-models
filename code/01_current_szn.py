@@ -1,5 +1,6 @@
 import time
 from datetime import date
+import pandas as pd
 from pathlib import Path
 from bball_ref import get_data
 
@@ -16,10 +17,13 @@ from bball_ref import get_data
 #this allows us to both develop locally as well as save data appropriately within our gh workflow
 script_dir = Path(__file__).parent.resolve()
 repo_dir = script_dir.parent
+data_dir = Path(repo_dir/'data')
 
 current_year = date.today().year
 current_date = date.today()
 
+adjusted_year = (pd.Timestamp.now() + pd.DateOffset(months=3)).year #season starts in Oct, so this will initiate the "next" calendar year
+current_szn_dir = data_dir/f'{adjusted_year}'
 
 def make_directory(folder_name):
     # folder_path = Path(f'./data/{folder_name}')
@@ -33,8 +37,6 @@ def save_data(year: int, date: str):
     Checks existence of year and date directories, and generates csv files for the current date
     '''
 
-    # year_directory = Path(f'./data/{year}')
-    # day_directory = Path(f'./data/{year}/{date}')
     year_directory = repo_dir/'data'/str(year)
     day_directory = repo_dir/'data'/str(year)/str(date)
 
@@ -66,4 +68,4 @@ def save_data(year: int, date: str):
 
 
 if __name__ == '__main__':
-    save_data(current_year, current_date)
+    save_data(adjusted_year, current_date)

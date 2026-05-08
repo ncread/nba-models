@@ -62,6 +62,7 @@ def feature_trans(year_dir: str, current_year_flag = False) -> pd.DataFrame:
 
 
 def format_mvp(file_path: str) -> pd.DataFrame:
+    '''MVP dataframe has unnecessary first row. This function drops the row, resets the index to the 2nd row, and only keeps a few columns'''
     mvp = pd.read_csv(file_path)
     mvp.columns = mvp.iloc[0]
     mvp = mvp.drop(mvp.index[0])
@@ -127,14 +128,15 @@ repo_dir = script_dir.parent
 data_dir = Path(repo_dir/'data')
 
 current_year = date.today().year
-current_szn_dir = data_dir/'2026' #will be changed when new season begins
+
+adjusted_year = (pd.Timestamp.now() + pd.DateOffset(months=3)).year #season starts in Oct, so this will initiate the "next" calendar year
+current_szn_dir = data_dir/f'{adjusted_year}'
 #############################
 
 past_df_list = []
 
 #looping through data directory folders
 for year_dir in data_dir.iterdir():
-    # print(f'DEBUG >>> name={year_dir.name!r} | is_dir={year_dir.is_dir()} | isdigit={year_dir.name.isdigit()}')
 
     if not year_dir.is_dir() or not year_dir.name.isdigit():
         print(f'***{year_dir.name}*** is not a valid directory. Skipping...')
@@ -146,10 +148,11 @@ for year_dir in data_dir.iterdir():
         df = feature_trans(year_dir, True)
         
     else:
+        past_df_list.append(f'{year_dir}/df.csv')
         # comment out next 3 lines & rerun if a change has been made to how the dataframe is constructed
-        # if Path(f'{year_dir}/df.csv').is_file(): #move on to next year if df.csv already exists
-        #     print(f'Dataframe has already been constructed for {str(year_dir)[-4:]}. Proceeding to the next year...')
-        #     continue
+        if Path(f'{year_dir}/df.csv').is_file(): #move on to next year if df.csv already exists
+            print(f'Dataframe has already been constructed for {str(year_dir)[-4:]}. Proceeding to the next year...')
+            continue
 
         df = feature_trans(year_dir)
         mvp_df = format_mvp(f'{year_dir}/mvp.csv')
@@ -162,23 +165,21 @@ for year_dir in data_dir.iterdir():
         # df['Award_eligible'] = np.where(df['MP'] >= 2000, 1, 0) 
         df = df[df['Award_eligible'] == 1]
         df = df.drop('Award_eligible', axis=1)
-        past_df_list.append(f'{year_dir}/df.csv')
+        # past_df_list.append(f'{year_dir}/df.csv')
     
     df['Year'] = str(year_dir)[-4:]
 
     #save df to csv
-    df.to_csv(f'{year_dir}/df.csv') #contains all plyr and team features of interest, plus mvp voter share
-    print(f'Successfully saved dataframe for {str(year_dir)[-4:]}')
+    df.to_csv(f'{year_dir}/df.csv') #contains all plyr and team features of interest (plus mvp voter share for completed seasons)
+    print(f'Successfully saved dataframe for {str(year_dir)[-4:]}.')
 
-if len(past_df_list) > 0:
-    df_concat_new = df_concatenation(past_df_list)
 
-    #read in existing concatenated file
-    df_concat = pd.read_csv(f'{data_dir}/df.csv')
-
-    #concatenate existing years of data with new completed year(s) of data
-    df_concat = pd.concat([df_concat, df_concat_new])
-    df_concat.to_csv(f'{data_dir}/df.csv')
-    print(f'Successfully concatenated dataframes from finished seasons.')
+df_concat = df_concatenation(past_df_list)
+existing_concat = pd.read_csv(f'{data_dir}/concat_df.csv')
+if len(df_concat) != len(existing_concat):
+    print('Changes made to concatenated dataframe. Overwriting concat_df.csv...')
+    df_concat.to_csv(f'{data_dir}/concat_df.csv')
 else:
-    print(f'No changes. All past, completed seasons already concatenated within {data_dir}/df.csv')
+    print('No changes made to concatenated dataframe.' )
+
+print('Data transformation complete.')
