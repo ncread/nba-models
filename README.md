@@ -2,10 +2,10 @@
 
 [![Run 01_current_szn.py](https://github.com/ncread/nba-models/actions/workflows/run_01_02_files.yaml/badge.svg)](https://github.com/ncread/nba-models/actions/workflows/run_01_02_files.yaml)
 
-<div style="display:flex; justify-content:center; align-items:center">
+<!-- <div style="display:flex; justify-content:center; align-items:center">
     <img style="text-align:center" src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExcWhibzNzNzkzOTNpMjRrN3hkdTdpaDdmcXVyZGYxaHk5ZnZlM255dSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/kGuwoQZRC2eTeYgtN2/giphy.gif" alt="Scotty Waving">
 </div>
-<br>
+<br> -->
 
 ## Overview
 <div style="display:flex">
@@ -18,7 +18,7 @@
 ```bash
 nba-models/
 ├── code
-│   ├── bball_ref.py
+│   ├── bball_ref.py   <- contains function to grab data from bball reference pages, used in both 00 and 01 files
 │   ├── 00_past_szn.py
 │   ├── 01_current_szn.py
 │   ├── 02_data_transformation.py
@@ -61,5 +61,7 @@ nba-models/
 └── uv.lock
 ```
 
-## Features and Model Selection
-Coming soon.
+## Features
+All of the features come from either Basketball Reference or NBA.com. The breakdown is displayed below:
+
+*More to come*
