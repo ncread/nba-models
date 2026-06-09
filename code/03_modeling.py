@@ -19,7 +19,7 @@ current_szn_dir = data_dir/f'{adjusted_year}'
 # ------------------------------------------------------------- #
 
 historical_df = pd.read_csv(f'{data_dir}/concat_df.csv')
-design_matrix_feat = ['Par','Stocks','eFG%','PER','TS%','WS','BPM','VORP','Team_Win%']
+design_matrix_feat = ['PTS','AST','TRB','Stocks','eFG%','PER','TS%','USG%','WS','BPM','VORP','Team_Win%']
 X = historical_df[design_matrix_feat] #design matrix
 y = historical_df['Share'] #prediction target
 

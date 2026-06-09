@@ -33,11 +33,11 @@ def feature_trans(year_dir: str, current_year_flag = False) -> pd.DataFrame:
         team_advanced = pd.read_csv(f'{year_dir}/adv_team_stats.csv')
 
     #plyr_per_game transformations
-    plyr_per_game['Par'] = round(plyr_per_game[['PTS','AST','TRB']].sum(axis=1), 4)
+    # plyr_per_game['Par'] = round(plyr_per_game[['PTS','AST','TRB']].sum(axis=1), 4)
     plyr_per_game['Stocks'] = round(plyr_per_game[['STL','BLK']].sum(axis=1), 3)
-    plyr_avg_df = plyr_per_game[['Player','Team','G','Par','Stocks','eFG%']]
+    plyr_avg_df = plyr_per_game[['Player','Team','G','PTS','AST','TRB','Stocks','eFG%']]
 
-    plyr_adv_df = plyr_advanced[['Player','Team','MP','PER','TS%','WS','BPM','VORP']]
+    plyr_adv_df = plyr_advanced[['Player','Team','MP','PER','TS%','USG%','WS','BPM','VORP']]
 
     #merge two player dataframes
     plyr_merged = pd.merge(plyr_avg_df, plyr_adv_df, on=['Player','Team'], how='left')
