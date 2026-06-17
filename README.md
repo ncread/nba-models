@@ -61,7 +61,15 @@ nba-models/
 └── uv.lock
 ```
 
-## Features
-All of the features come from either Basketball Reference or NBA.com. The breakdown is displayed below:
+## Feature Origin & Engineering
+Initial set of features are grabbed from either [Basketball Reference](https://www.basketball-reference.com/) or [the official NBA website](https://www.nba.com/):
 
-*More to come*
+
+| Origin | Features |  
+|-----------|---------|
+| BBall Ref | pts, ast, trb, stocks (stl+blk), eFG%, MP, PER, TS%, USG%, WS, BPM, VORP, Team Win % |
+| NBA.com | PIE (player impact estimate) |
+
+Prior to modeling, correlations between features were analyzed and decisions were made to ensure that highly correlated variables were not both included.
+<br>
+Typically for tree-based algorithms, the benefit to scaling the data lies in lower computational costs rather than ensuring features are on the same scale. In this case with data "grouped" by season, standardization using season-specific z-scores plays a bigger role. Z-score standardization essentially corrects for dynamic feature distributions, which for our purposes reduces the impact of the significant temporal shifts in offensive production that the NBA has seen over the last decade plus. This project initially was going to include data tracking all the way back to 1975, but decisions and adjustements were made to begin with the 1996-97 season. Even with the adjusted time period, we can still see significant increases in stats over the last 30 years.
