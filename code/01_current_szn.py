@@ -2,70 +2,56 @@ import time
 from datetime import date
 import pandas as pd
 from pathlib import Path
-from bball_ref import get_data
+from scrape_funcs import get_data, get_pie_feature
 
 
-##########################################################################
+def make_directory(directory: Path, timestamp):
+    '''Checks if the year input exists as a directory and creates it if not'''
+    print(f'Checking for {timestamp} directory presence......', end='')
+    if not directory.is_dir():
+        directory.mkdir(parents=True, exist_ok=True)
+        print(f'New {timestamp} directory created!')
+    else:
+        print('Already constructed!')
 
-#this file will be run once per week (~6 AM Monday mornings) to capture changes to the data from previous week's games
 
-##########################################################################
+def extract_weekly_data(year: int):
+    '''Sources the dataframes from bball ref and nba sites and populates a dictionary containing file names and the corresponding dataframes'''
 
-#2025-26 season
-# reg_season_end = '' #if we are more than 1 day beyond end of reg season, don't run. but once we hit beginning of next, year is year+1
+    data_dict = {'plyr_per_game': get_data(year, 'per_game')}
+    time.sleep(3)
 
-#this allows us to both develop locally as well as save data appropriately within our gh workflow
+    data_dict['plyr_advanced'] = get_data(year, 'advanced')
+    time.sleep(3)
+
+    data_dict['adv_team_stats'] = get_data(year, None, 'team')
+    time.sleep(3)
+
+    data_dict['pie'] = get_pie_feature(year)
+
+    return data_dict
+
+
+def save_data(data_dict: dict[str: pd.DataFrame], week_dir: Path):
+    '''Loops through the dictionary and saves each dataframe as a csv file'''
+    for name, df in data_dict.items():
+       df.to_csv(week_dir/f'{name}.csv') 
+
+
+
 script_dir = Path(__file__).parent.resolve()
 repo_dir = script_dir.parent
 data_dir = Path(repo_dir/'data')
 
-current_year = date.today().year
-current_date = date.today()
+current_day = str(date.today())
+adjusted_year = str((pd.Timestamp.now() + pd.DateOffset(months=3)).year)
 
-adjusted_year = (pd.Timestamp.now() + pd.DateOffset(months=3)).year #season starts in Oct, so this will initiate the "next" calendar year
-current_szn_dir = data_dir/f'{adjusted_year}'
-
-def make_directory(folder_name):
-    # folder_path = Path(f'./data/{folder_name}')
-    folder_path = repo_dir/'data'/str(folder_name)
-    folder_path.mkdir(parents=True, exist_ok=True)
+year_dir = data_dir/adjusted_year
+week_dir = data_dir/adjusted_year/current_day
 
 
-def save_data(year: int, date: str):
-    '''
-    Saves data for ongoing season
-    Checks existence of year and date directories, and generates csv files for the current date
-    '''
+make_directory(year_dir, adjusted_year)
+make_directory(week_dir, current_day)
 
-    year_directory = repo_dir/'data'/str(year)
-    day_directory = repo_dir/'data'/str(year)/str(date)
-
-    if not year_directory.is_dir():
-        print(f'Creating directory for {year}')
-        make_directory(year)
-    if not day_directory.is_dir():
-        print(f'Creating directory for {date}')
-        # day_path = Path(day_directory)
-        day_directory.mkdir(parents=True, exist_ok=True)
-    
-
-        team_dfs = get_data(year, None, 'team')
-
-        generator_dict = {f'{date}_plyr_per_game.csv': lambda: get_data(year, 'per_game').to_csv(day_directory/'plyr_per_game.csv'),
-                            f'{date}_plyr_advanced.csv': lambda: get_data(year, 'advanced').to_csv(day_directory/'plyr_advanced.csv'),
-                            f'{date}_team_per_game.csv': lambda: team_dfs[0].to_csv(day_directory/'team_per_game.csv'),
-                            f'{date}_opp_team_per_game.csv': lambda: team_dfs[1].to_csv(day_directory/'opp_team_per_game.csv'),
-                            f'{date}_adv_team_stats.csv': lambda: team_dfs[2].to_csv(day_directory/'adv_team_stats.csv')
-        }
-
-        for i in generator_dict:
-            print(f'Generating {i}')
-            generator_dict[i]()
-            time.sleep(3) #avoid overloading bref server
-        print(f'All files present for {date}')
-    else:
-        print(f'{day_directory} directory is already present')
-
-
-if __name__ == '__main__':
-    save_data(adjusted_year, current_date)
+data = extract_weekly_data(adjusted_year)
+save_data(data, week_dir)

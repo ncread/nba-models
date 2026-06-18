@@ -14,7 +14,7 @@ def make_year_directory(directory, year):
         print('Already constructed!')
 
 
-def save_data(directory, year):
+def save_past(directory, year):
     '''This function checks if the appropriate files exist yet within the year's folder, then generates/saves them if necessary'''
     
     generator_dict = {'plyr_per_game.csv': lambda: get_data(year, 'per_game').to_csv(f'{directory}/plyr_per_game.csv'),
@@ -60,4 +60,4 @@ if __name__ == '__main__':
         directory = data_dir/str(year)
         
         make_year_directory(directory, year)
-        save_data(directory, year)
+        save_past(directory, year)
