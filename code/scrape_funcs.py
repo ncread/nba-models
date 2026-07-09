@@ -35,7 +35,7 @@ def get_data(year: int, table_type: str, trigger = None) -> pd.DataFrame:
     return df
 
 
-def get_pie_feature(year:int) -> pd.DataFrame:
+def get_pie_feature(year: str) -> pd.DataFrame:
     stats = leaguedashplayerstats.LeagueDashPlayerStats(
         season=year,
         season_type_all_star='Regular Season',
