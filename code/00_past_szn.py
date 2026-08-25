@@ -4,17 +4,8 @@ import time
 from datetime import date
 import pandas as pd
 from pathlib import Path
-from scrape_funcs import get_data, get_pie_feature
-
-
-def make_directory(directory: Path, year: int):
-    '''Checks if the year input exists as a directory and creates it if not'''
-    print(f'Checking for {year} directory......', end='')
-    if not directory.is_dir():
-        directory.mkdir(parents=True, exist_ok=True)
-        print(f'New {year} directory created!')
-    else:
-        print('Already constructed! ', end='')
+from code.providers import get_bballref, get_nba
+from code.helpers import make_directory, save_data
 
 
 def extract_past_data(year: int, current_season: str, year_dir: Path) -> dict:
@@ -27,29 +18,24 @@ def extract_past_data(year: int, current_season: str, year_dir: Path) -> dict:
         print(f'Extracting {missing_files} for {year}...', end='')
 
         if 'plyr_per_game.csv' in missing_files:
-            data_dict = {'plyr_per_game': get_data(year, 'per_game')}
+            data_dict = {'plyr_per_game': get_bballref(year, 'per_game')}
             time.sleep(2)
         if 'plyr_advanced.csv' in missing_files:
-            data_dict['plyr_advanced'] = get_data(year, 'advanced')
+            data_dict['plyr_advanced'] = get_bballref(year, 'advanced')
             time.sleep(2)
         if 'adv_team_stats.csv' in missing_files:
-            data_dict['adv_team_stats'] = get_data(year, None, 'team')
+            data_dict['adv_team_stats'] = get_bballref(year, None, 'team')
             time.sleep(2)
         if 'pie.csv' in missing_files:
-            data_dict['pie'] = get_pie_feature(current_season) 
+            data_dict['pie'] = get_nba(current_season) 
             time.sleep(2)
         if 'mvp.csv' in missing_files:
-            data_dict['mvp'] = get_data(year, None, 'mvp')
+            data_dict['mvp'] = get_bballref(year, None, 'mvp')
 
         print('Dataframe extractions successful.')
     else:
         print('All files present.')
     return data_dict
-
-
-def save_past_data(data_dict: dict[str: pd.DataFrame], year_dir: Path):
-    for name, df in data_dict.items():
-        df.to_csv(year_dir/f'{name}.csv')
 
 
 def main():
@@ -71,7 +57,7 @@ def main():
         #maybe add logic checking for file existence down the line
         data = extract_past_data(year, current_season, year_dir)
 
-        save_past_data(data, year_dir)
+        save_data(data, year_dir)
 
 if __name__ == '__main__':
     main()

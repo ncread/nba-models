@@ -3,7 +3,7 @@ import pandas as pd
 from nba_api.stats.endpoints import leaguedashplayerstats
 
 
-def get_data(year: int, table_type: str, trigger = None) -> pd.DataFrame:
+def get_bballref(year: int, table_type: str, trigger = None) -> pd.DataFrame:
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36"}
 
     if trigger == 'mvp':
@@ -35,7 +35,7 @@ def get_data(year: int, table_type: str, trigger = None) -> pd.DataFrame:
     return df
 
 
-def get_pie_feature(year: str) -> pd.DataFrame:
+def get_nba(year: str) -> pd.DataFrame:
     stats = leaguedashplayerstats.LeagueDashPlayerStats(
         season=year,
         season_type_all_star='Regular Season',
