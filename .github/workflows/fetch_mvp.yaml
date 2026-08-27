@@ -1,0 +1,36 @@
+name: Run fetch_mvp.py
+
+on:
+  schedule:
+    - cron: '0 0 1 7 *' #midnight July 1st UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install project dependencies
+        run: uv sync --frozen
+
+      - name: Run Python script to grab MVP standings
+        run: uv run ./code/fetch_mvp.py
+
+      - name: Commit & Push to Repo
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: '(Auto)-Fetch MVP results'

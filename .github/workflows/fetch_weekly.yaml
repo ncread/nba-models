@@ -1,0 +1,36 @@
+name: Run fetch_weekly.py
+
+on:
+  schedule:
+    - cron: '0 12 * 1-4,11-12 1' #every Monday morning, Nov-Apr
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install project dependencies
+        run: uv sync --frozen
+
+      - name: Run Python script to grab weekly NBA in-season stats
+        run: uv run ./code/fetch_weekly.py
+
+      - name: Commit & Push to Repo
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: '(Auto)-Fetch in-season weekly stats'
