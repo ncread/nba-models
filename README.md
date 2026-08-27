@@ -1,7 +1,7 @@
 <h1 style="color:blue; text-align:center">NBA MVP Prediction Modeling</h1>
 
-[![Run 01_current_szn.py](https://github.com/ncread/nba-models/actions/workflows/run_01_02_files.yaml/badge.svg)](https://github.com/ncread/nba-models/actions/workflows/run_01_02_files.yaml)
-
+[![Run fetch_mvp.py](https://github.com/ncread/nba-models/actions/workflows/fetch_mvp.yaml/badge.svg?branch=main)](https://github.com/ncread/nba-models/actions/workflows/fetch_mvp.yaml)
+[![Run fetch_weekly.py](https://github.com/ncread/nba-models/actions/workflows/fetch_weekly.yaml/badge.svg?branch=main)](https://github.com/ncread/nba-models/actions/workflows/fetch_weekly.yaml)
 <!-- <div style="display:flex; justify-content:center; align-items:center">
     <img style="text-align:center" src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExcWhibzNzNzkzOTNpMjRrN3hkdTdpaDdmcXVyZGYxaHk5ZnZlM255dSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/kGuwoQZRC2eTeYgtN2/giphy.gif" alt="Scotty Waving">
 </div>
