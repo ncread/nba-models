@@ -15,46 +15,46 @@ data_dir = Path(repo_dir/'data')
 json_path = Path(repo_dir/'seasons.json')
 
 
-def fetch_weekly_data(year: int, current_season: str) -> dict:
-    print('Fetching 4 dataframes...')
-    data_dict = {'plyr_per_game': get_bballref(year, 'per_game')}
-    time.sleep(2)
-
-    data_dict['plyr_advanced'] = get_bballref(year, 'advanced')
-    time.sleep(2)
-
-    data_dict['adv_team_stats'] = get_bballref(year, None, 'team')
-
-    data_dict['pie'] = get_nba(current_season)
-
-    print('Dataframe extractions successful')
-
-    return data_dict
-
-
-if __name__ == '__main__':
+def fetch_weekly() -> dict:
     json_file = load_json(json_path)
     current_day = str(date.today())
     season_year = (pd.Timestamp.now() + pd.DateOffset(months=3)).year      
 
     if json_file["seasons"][str(season_year)]["status"] == "finalized":
         print(f'End of season stats already pulled for {season_year}. Exiting...')
+        return
 
+    season_api_string = json_file["seasons"][str(season_year)]["api_string"]
+
+    year_dir = data_dir/str(season_year)
+    week_dir = year_dir/current_day
+
+    make_directory(year_dir)
+    make_directory(week_dir)
+
+
+    print('Fetching 4 dataframes...')
+    data = {'plyr_per_game': get_bballref(season_year, 'per_game')}
+    time.sleep(2)
+
+    data['plyr_advanced'] = get_bballref(season_year, 'advanced')
+    time.sleep(2)
+
+    data['adv_team_stats'] = get_bballref(season_year, None, 'team')
+
+    data['pie'] = get_nba(season_api_string)
+
+    print('Dataframe extractions successful')
+
+    if current_day > json_file["seasons"][str(season_year)]["season_end"]:
+        make_directory(year_dir/'final')
+        save_data(data, year_dir/'final')
+        json_file["seasons"][str(season_year)]["status"] = "finalized"
+        print('Season set to finalized')
+        save_json(json_file, json_path)
     else:
-        year_dir = data_dir/str(season_year)
-        week_dir = year_dir/current_day
-
-        make_directory(year_dir)
-        make_directory(week_dir)
-
-        season_api_string = json_file["seasons"][str(season_year)]["api_string"]   
-        data = fetch_weekly_data(season_year, season_api_string)
-
-        if current_day > json_file["seasons"][str(season_year)]["season_end"]:
-            make_directory(year_dir/'final')
-            save_data(data, year_dir/'final')
-            json_file["seasons"][str(season_year)]["status"] = "finalized"
-            print('Season set to finalized')
-            save_json(json_file, json_path)
-
         save_data(data, week_dir)
+
+
+if __name__ == '__main__':
+    fetch_weekly()
