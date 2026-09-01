@@ -17,4 +17,6 @@ other/
 # 03_modeling.py
 03_modeling.ipynb
 
+**/team_per_game.csv
+**/opp_team_per_game.csv
 *predictions_df.csv
