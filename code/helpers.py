@@ -22,8 +22,10 @@ def save_data(data: pd.DataFrame | dict[str:pd.DataFrame], directory: Path) -> N
     elif isinstance(data, pd.DataFrame):
         data.to_csv(directory)
         print(f'Dataframe successfully saved to {directory.as_posix()}')
+    elif data is None:
+        print(f'ISSUE: Trying to save None. Nothing saved to {directory.as_posix()}')
     else:
-        print('Input data is neither a dictionary nor a single dataframe')
+        print(f'ISSUE: Type {type(data)} could not be saved.')
 
 
 def load_json(json_path: Path):

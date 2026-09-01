@@ -7,27 +7,29 @@ sys.path.insert(0, Path(__file__).parent.resolve())
 
 from providers import get_bballref, get_nba
 from helpers import make_directory, save_data, load_json, save_json
+from transform import transform_all
 
 
 script_dir = Path(__file__).parent.resolve()
 repo_dir = script_dir.parent
-data_dir = Path(repo_dir/'data')
+raw_dir = Path(repo_dir/'data'/'raw')
 json_path = Path(repo_dir/'seasons.json')
 
+SEASON_YEAR = (pd.Timestamp.now() + pd.DateOffset(months=3)).year 
 
-def fetch_weekly() -> dict:
+
+def fetch_weekly(season_year) -> dict:
     json_file = load_json(json_path)
-    current_day = str(date.today())
-    season_year = (pd.Timestamp.now() + pd.DateOffset(months=3)).year      
+    current_day = str(date.today())     
 
-    if json_file["seasons"][str(season_year)]["status"] == "finalized":
+    if json_file["seasons"][str(season_year)]["season_over"]:
         print(f'End of season stats already pulled for {season_year}. Exiting...')
         return
 
     season_api_string = json_file["seasons"][str(season_year)]["api_string"]
 
-    year_dir = data_dir/str(season_year)
-    week_dir = year_dir/current_day
+    year_dir = raw_dir/str(season_year)
+    week_dir = year_dir/'weekly'/current_day
 
     make_directory(year_dir)
     make_directory(week_dir)
@@ -49,7 +51,7 @@ def fetch_weekly() -> dict:
     if current_day > json_file["seasons"][str(season_year)]["season_end"]:
         make_directory(year_dir/'final')
         save_data(data, year_dir/'final')
-        json_file["seasons"][str(season_year)]["status"] = "finalized"
+        json_file["seasons"][str(season_year)]["season_over"] = True
         print('Season set to finalized')
         save_json(json_file, json_path)
     else:
@@ -57,4 +59,5 @@ def fetch_weekly() -> dict:
 
 
 if __name__ == '__main__':
-    fetch_weekly()
+    fetch_weekly(SEASON_YEAR)
+    transform_all(SEASON_YEAR)
