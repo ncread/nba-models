@@ -3,7 +3,7 @@ from datetime import datetime
 from pathlib import Path
 sys.path.insert(0, Path(__file__).parent.resolve())
 
-from helpers import make_directory, save_data, load_json
+from helpers import save_data, load_json
 from providers import get_bballref, get_nba
 from fetch_mvp import fetch_mvp_func
 from transform import transform_all
@@ -26,7 +26,7 @@ def check_missing_files(year_dir):
     return missing
 
 
-def fetch_historical():
+def fetch_historical(overwrite = False):
     for year_dir in raw_dir.iterdir():
         try:
             season_year = int(year_dir.name)
@@ -66,9 +66,14 @@ def fetch_historical():
                 continue
 
         train_path = train_dir/f'{season_year}.parquet'
-        if train_path.is_file():
+
+        if overwrite:
+            print(f'Overwriting the transformed file for {season_year}')
+            transform_all(season_year)
+
+        elif train_path.is_file():
             print(f'Transformed file for {season_year} already exists. Skipping...')
-            continue
+            continue 
         
         else:
             print('No train file present. Transforming files...')
@@ -77,4 +82,4 @@ def fetch_historical():
 
 
 if __name__ == '__main__':
-    fetch_historical()
+    fetch_historical(overwrite = True)
