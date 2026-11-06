@@ -3,7 +3,7 @@ from datetime import datetime
 from pathlib import Path
 sys.path.insert(0, Path(__file__).parent.resolve())
 
-from helpers import save_data, load_json
+from helpers import save_data, load_json, make_directory
 from providers import get_bballref, get_nba
 from fetch_mvp import fetch_mvp_func
 from transform import transform_all
@@ -18,11 +18,12 @@ json_file = load_json(repo_dir/'seasons.json')
 current_year = datetime.now().year
 
 EXPECTED_FILES = {'plyr_per_game.csv','plyr_advanced.csv','adv_team_stats.csv','pie.csv','mvp.csv'}
+EXPECTED_FILES_pre1997 = {'plyr_per_game.csv','plyr_advanced.csv','adv_team_stats.csv','mvp.csv'}
 
-
-def check_missing_files(year_dir):
+def check_missing_files(expected, year_dir):
+    make_directory(year_dir)
     present_files = {f.name for f in year_dir.iterdir() if f.is_file()}
-    missing = EXPECTED_FILES - present_files
+    missing = expected - present_files
     return missing
 
 
@@ -37,14 +38,22 @@ def fetch_historical(overwrite = False):
         print('-----------------------------------------------')
         print(f'{season_year}')
 
-        if not year_dir.is_dir() or not json_file["seasons"][str(season_year)]["season_over"]:
+        season_over = json_file["seasons"][str(season_year)]["season_over"]
+
+        if not year_dir.is_dir() or not season_over:
             print(f'{season_year} season not over! Skipping...')
             continue
 
         print(f'Checking files in {season_year}/...', end='')
 
         final_path = year_dir/'final'
-        missing = check_missing_files(final_path)
+
+        if season_year < 1997:
+            missing = check_missing_files(EXPECTED_FILES_pre1997, final_path)
+        else:
+            missing = check_missing_files(EXPECTED_FILES, final_path)
+
+
         if not missing:
             print(f'All raw files present for {season_year}')
 
