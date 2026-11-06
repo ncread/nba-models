@@ -5,6 +5,7 @@ build/
 dist/
 wheels/
 *.egg-info
+code/.ipynb_checkpoints/
 
 # Virtual environments
 .venv
@@ -12,7 +13,6 @@ wheels/
 .ruff_cache/
 notes.txt
 prac.py
-test.py
 other/
 # 03_modeling.py
 03_modeling.ipynb
@@ -20,3 +20,5 @@ other/
 **/team_per_game.csv
 **/opp_team_per_game.csv
 *predictions_df.csv
+
+deprecated/
