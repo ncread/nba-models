@@ -18,7 +18,7 @@ json_path = Path(repo_dir/'seasons.json')
 SEASON_YEAR = (pd.Timestamp.now() + pd.DateOffset(months=3)).year 
 
 
-def fetch_weekly(season_year) -> dict:
+def fetch_weekly(season_year):
     json_file = load_json(json_path)
     current_day = str(date.today())     
 
@@ -30,11 +30,7 @@ def fetch_weekly(season_year) -> dict:
 
     year_dir = raw_dir/str(season_year)
     week_dir = year_dir/'weekly'/current_day
-
-    make_directory(year_dir)
-    make_directory(week_dir)
-
-
+    
     print('Fetching 4 dataframes...')
     data = {'plyr_per_game': get_bballref(season_year, 'per_game')}
     time.sleep(2)
@@ -54,10 +50,13 @@ def fetch_weekly(season_year) -> dict:
         json_file["seasons"][str(season_year)]["season_over"] = True
         print('Season set to finalized')
         save_json(json_file, json_path)
+        
     else:
+        make_directory(week_dir)
         save_data(data, week_dir)
+
+    transform_all(SEASON_YEAR)
 
 
 if __name__ == '__main__':
     fetch_weekly(SEASON_YEAR)
-    transform_all(SEASON_YEAR)
