@@ -1,5 +1,6 @@
 import time
 import pandas as pd
+import unicodedata
 from nba_api.stats.endpoints import leaguedashplayerstats
 
 
@@ -32,6 +33,7 @@ def get_bballref(year: int, table_type: str, trigger = None) -> pd.DataFrame:
     tables = pd.read_html(url, storage_options=headers)
     time.sleep(3)
     df = tables[0]
+    df['Player'] = df['Player'].astype(str).apply(lambda s: unicodedata.normalize('NFKD', s).encode('ascii','ignore').decode('utf-8'))
     return df
 
 
@@ -46,4 +48,5 @@ def get_nba(year: str) -> pd.DataFrame:
 
     df = stats.get_data_frames()[0]
     pie_df = df[['PLAYER_NAME','TEAM_ABBREVIATION','PIE']].sort_values('PIE', ascending=False)
+    pie_df['PLAYER_NAME'] = df['PLAYER_NAME'].astype(str).apply(lambda s: unicodedata.normalize('NFKD', s).encode('ascii','ignore').decode('utf-8'))
     return pie_df
