@@ -55,9 +55,11 @@ def transform_plyr_dfs(pg_df, adv_df):
     pg_df['STL'] = pd.to_numeric(pg_df['STL'], errors='coerce')
     pg_df['BLK'] = pd.to_numeric(pg_df['BLK'], errors='coerce')
     pg_df['Stocks'] = round(pg_df[['STL','BLK']].sum(axis=1), 3)
-    pg_df = pg_df[['Player','Team','G','PTS','AST','TRB','Stocks','eFG%']]
+    pg_df.rename(columns={'MP':'MPG'}, inplace=True)
+    pg_df = pg_df[['Player','Team','G','MPG','PTS','AST','TRB','Stocks','eFG%']]
+    pg_df
 
-    adv_df = adv_df[['Player','Team','MP','PER','TS%','USG%','WS','BPM','VORP']]
+    adv_df = adv_df[['Player','Team','MP','PER','TS%','USG%','WS','VORP']]
 
     merged = pd.merge(pg_df, adv_df, on=['Player','Team'], how='left')
     merged['Team'] = merged['Team'].map(TEAM_ABB_DICT)
@@ -118,7 +120,7 @@ def transform_all(year):
     season_year = str(year)
 
     year_dir = raw_dir/season_year
-    week_dir = year_dir/current_day
+    week_dir = year_dir/'weekly'/current_day
     final_path = year_dir/'final'
 
     json_path = Path(repo_dir/'seasons.json')
@@ -151,7 +153,7 @@ def transform_all(year):
     merged['Year'] = int(season_year)
     merged['Games_Played_PCT'] = round(merged['G'] / merged['Team_G'], 4)
 
-    zcols = ['PTS','AST','TRB','Stocks','eFG%','MP','TS%','USG%','WS','BPM','VORP','Team_Win%','pie']
+    zcols = ['PTS','AST','TRB','Stocks','eFG%','MP','TS%','USG%','WS','VORP','Team_Win%','pie']
     merged = zscore_transform(merged, zcols)
 
     if mvp_pulled:
@@ -166,7 +168,7 @@ def transform_all(year):
         merged.to_parquet(data_dir/'train'/f'{season_year}.parquet')
 
     else:
-        merged['Award_eligible'] = np.where(merged['Games_Played_PCT'] > (60/82), 1, 0) #in-season rough eligibility filter
+        merged['Award_eligible'] = np.where((merged['Games_Played_PCT'] > (60/82)) & (merged['MPG'] >= 25), 1, 0) #in-season rough eligibility filter
         merged = merged[merged['Award_eligible'] == 1]
         merged = merged.drop('Award_eligible', axis=1)
         make_directory(data_dir/'inference'/season_year)
