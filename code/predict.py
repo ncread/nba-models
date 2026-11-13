@@ -76,7 +76,7 @@ disp_df['pred_date'] = latest_inf_file.stem
 print('MVP Predictions made...')
 
 # print('-----Highest 20 Share Predictions------')
-# print(disp_df.nlargest(20, 'pred_mvp_share')) #[['Player','pred_mvp_share']])
+print(disp_df.nlargest(20, 'pred_mvp_share')) #[['Player','pred_mvp_share']])
 
 make_directory(data_dir/'predictions'/'df')
 
