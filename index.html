@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NBA MVP Voter Share Predictions</title>
+<script>
+try { const t = localStorage.getItem("theme") ||
+  (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+<style>
+  :root {
+    --bg: rgb(255, 255, 255); --card: rgb(247, 245, 245); --text: #16191d; --muted: #6b7280;
+    --line: #e5e7eb; --accent: #2563eb; --bar: #93b4f5; --head: #e9f1fd;
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1216; --card: #171b21; --text: #e8eaed; --muted: #8b93a1;
+    --line: #272d36; --accent: #6ea0ff; --bar: #2f4f8f; --head: #1f252d;
+  }
+  
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { padding: 14px 20px 8px; max-width: 1200px; margin: 0 auto; }
+  .logo img {
+      transition: transform 0.3s ease;
+  }
+
+  .logo img:hover {transform: scale(1.1);}
+
+  .logo img {height: 50px; width: 75px; border-radius: 10px; display: block; }
+  h1 { margin: 0 0 4px; font-size: 26px; }
+  .sub { color: var(--muted); margin: 0; }
+  header { position: relative; }
+  #theme-toggle { position: absolute; top: 28px; right: 16px; background: var(--card); color: var(--text);
+  border: 1px solid var(--line); border-radius: 24px; padding: 6px 10px; cursor: pointer; font-size: 14px; display: flex; 
+  transition: background 0.3s ease; border-color: 0.3s ease; flex-shrink: 0;}
+
+  .toggle-icon {font-size: 14px; line-height: 1; transition: opacity 0.3s ease; transform: 0.3s ease;}
+
+  nav { position: sticky; top: 0; z-index: 5; background: var(--bg);
+        border-bottom: 1px solid var(--line); padding: 10px 16px; margin-left: 16px}
+  nav .inner { max-width: 1200px; margin: 0 auto; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  nav a { padding: 4px 12px; border: 1px solid var(--line); border-radius: 999px;
+          text-decoration: none; color: var(--text); font-size: 13px; background: var(--card); }
+  nav a:hover { border-color: var(--accent); color: var(--accent); }
+  nav select { padding: 4px 10px; border: 1px solid var(--line); border-radius: 999px;
+             background: var(--card); color: var(--text); font-size: 13px; }
+  section { scroll-margin-top: 60px; }   /* keeps the sticky nav from covering the heading you jump to */
+  
+  main { max-width: 1200px; margin: 0 auto; padding: 16px; display: grid; gap: 24px; }
+  section { background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  section h2 { margin: 0; padding: 14px 16px; font-size: 18px; display: flex; gap: 12px; align-items: baseline; }
+  section h2 small { color: var(--muted); font-weight: 400; font-size: 13px; }
+  .scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+  th, td { padding: 8px 10px; text-align: right; white-space: nowrap; border-top: 1px solid var(--line); }
+  th { background: var(--head); font-size: 12px; text-transform: none; color: var(--muted);
+       font-weight: 600; position: sticky; top: 0; }
+  th.l, td.l { text-align: left; }
+  td.rank { color: var(--muted); text-align: center; width: 40px; }
+  td.player { font-weight: 600; }
+  tr:hover td { background: color-mix(in srgb, var(--accent) 6%, transparent); }
+  td.share { position: relative; min-width: 110px; font-weight: 600; }
+  td.share .bar { position: absolute; left: 0; top: 0; bottom: 0; background: rgb(255, 255, 151); opacity: .45; }
+  td.share span { position: relative; }
+  .trendwrap { max-width: 1200px; margin: 16px auto 0; padding: 0 16px; }
+  #trend .hint { padding: 0 16px 8px; color: var(--muted); font-size: 13px; margin: 0; }
+  #trend svg { display: block; }
+  #trend text { font-family: inherit; }
+  #trend .pl { cursor: pointer; transition: opacity .15s; }
+  #trend svg.dim .pl:not(.on) { opacity: .1; }
+  #trend .lbl { font-size: 12px; font-weight: 600; fill: var(--text);
+                paint-order: stroke; stroke: var(--card); stroke-width: 4px; stroke-linejoin: round; }
+  #trend .axis { font-size: 12px; fill: var(--muted); }
+  #trend .rk { font-size: 11px; font-weight: 700; fill: #fff; pointer-events: none; }
+  .msg { max-width: 1200px; margin: 24px auto; padding: 16px; color: var(--muted); }
+  .msg button, .msg label { cursor: pointer; }
+  .picker { display: inline-block; margin-top: 8px; padding: 8px 14px; border: 1px solid var(--line);
+            border-radius: 8px; background: var(--card); color: var(--text); }
+  input[type=file] { display: none; }
+  
+  @media (max-width: 640px) {
+  main { padding: 8px; gap: 16px; }
+  .trendwrap, header { padding-left: 4px; padding-right: 4px; }
+
+  nav {margin-left: 4px;}
+
+  th, td { padding: 6px 6px; font-size: 13px; }
+
+  /* name wrap */
+  td.player { white-space: normal; line-height: 1.2; max-width: 105px; }
+  td.rank { width: 28px; min-width: 28px; }
+
+  /* sticky rank, player */
+  th:nth-child(-n+2), td:nth-child(-n+2) { position: sticky; z-index: 1; background: var(--card); }
+  th:nth-child(-n+2) { background: var(--head); z-index: 2; }
+  th:nth-child(1), td:nth-child(1) { left: 0; }
+  th:nth-child(2), td:nth-child(2) { left: 28px; box-shadow: 2px 0 0 var(--line); }
+  tr:hover td:nth-child(-n+2) { background: var(--card); } /* keep sticky cells opaque */
+}
+</style>
+
+</head>
+<body>
+<header>
+  <div class="header_top">
+            <div class="logo">
+                <a href="https://noahcread.com"><img src="/assets/nrlogo2.png" alt="home"></a>
+            </div>
+  </div>
+  <h1>NBA MVP Voter Share Predictions</h1>
+  <p class="sub" id="status">Loading…</p>
+  <div class="header_right">
+    <button id="theme-toggle" type="button" aria-label="Toggle light/dark mode">
+        <span class="toggle-icon sun">🌞</span>
+        <span class="toggle-icon moon">🌙</span>
+  </div>
+
+</header>
+<nav><div class="inner" id="nav"></div></nav>
+<div class="trendwrap"><section id="trend" hidden></section></div>
+<main id="main"></main>
+<div class="msg" id="fallback" hidden>
+  Couldn't load <code>predictions.json</code> automatically (browsers block this when opening the page straight from disk).
+  Either serve this folder (<code>python -m http.server</code>) or pick the file manually:<br>
+  <label class="picker">Choose predictions.json<input type="file" id="file" accept=".json,application/json"></label>
+</div>
+
+<script>
+const DATA_URL = "./data/predictions/predictions.json";   // put your JSON next to this page
+
+const TEAM_ABBR = {
+  "Atlanta Hawks":"ATL","Boston Celtics":"BOS","Brooklyn Nets":"BKN","Charlotte Hornets":"CHA",
+  "Chicago Bulls":"CHI","Cleveland Cavaliers":"CLE","Dallas Mavericks":"DAL","Denver Nuggets":"DEN",
+  "Detroit Pistons":"DET","Golden State Warriors":"GSW","Houston Rockets":"HOU","Indiana Pacers":"IND",
+  "Los Angeles Clippers":"LAC","Los Angeles Lakers":"LAL","Memphis Grizzlies":"MEM",
+  "Miami Heat":"MIA","Milwaukee Bucks":"MIL","Minnesota Timberwolves":"MIN","New Orleans Pelicans":"NOP",
+  "New York Knicks":"NYK","Oklahoma City Thunder":"OKC","Orlando Magic":"ORL","Philadelphia 76ers":"PHI",
+  "Phoenix Suns":"PHX","Portland Trail Blazers":"POR","Sacramento Kings":"SAC","San Antonio Spurs":"SAS",
+  "Toronto Raptors":"TOR","Utah Jazz":"UTA","Washington Wizards":"WAS"
+};
+
+
+const pct = d => v => (v * 100).toFixed(d) + "%";
+const fix = d => v => Number(v).toFixed(d);
+const COLS = {
+  filt_mvp_rank: { label: "#", title: "Projected MVP Rank", cls: "rank", fmt: v => v },
+  Player:        { label: "Player", title: "Player Name", cls: "l player" },
+  Team:          { label: "Team", title: "Team Abbreviation", cls: "l" },
+  G:             { label: "G", title: "Games Played", fmt: fix(0) },
+  Team_G:        { label: "Team G", title: "Total Team Games", fmt: fix(0) },
+  MPG:           { label: "MPG", title: "Minutes Per Game", fmt: fix(1) },
+  PTS:           { label: "PTS", title: "Points Per Game", fmt: fix(1) },
+  AST:           { label: "AST", title: "Assists Per Game", fmt: fix(1) },
+  TRB:           { label: "TRB", title: "Total Rebounds Per Game", fmt: fix(1) },
+  Stocks:        { label: "STK", title: "Steals + Blocks Per Game", fmt: fix(1) },
+  "eFG%":        { label: "eFG%", title: "Effective Field Goal Percentage", fmt: pct(1) },
+  "TS%":         { label: "TS%", title: "True Shooting Percentage", fmt: pct(1) },
+  PER:           { label: "PER", title: "Player Efficiency Rating", fmt: fix(1) },
+  "USG%":        { label: "USG%", title: "Usage Rate", fmt: fix(1) },
+  WS:            { label: "WS", title: "Total Win Shares", fmt: fix(1) },
+  VORP:          { label: "VORP", title: "Value Over Replacement Player", fmt: fix(1) },
+  "Team_Win%":   { label: "Team W%", title: "Team Win Percentage", fmt: fix(3) },
+  pie:           { label: "PIE", title: "Player Impact Estimate", fmt: fix(3) },
+  pred_mvp_share:{ label: "Pred. MVP share", title: "Predicted MVP Voter Share", cls: "share", fmt: pct(2) },
+};
+const FIRST = ["filt_mvp_rank", "Player", "Team", "pred_mvp_share"];
+
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+function prettyDate(iso) {
+  const d = new Date(iso + "T12:00:00");
+  return isNaN(d) ? iso : d.toLocaleDateString(undefined, { weekday: "short", month: "long", day: "numeric", year: "numeric" });
+}
+
+
+function renderTrend(data) {
+  const el = document.getElementById("trend");
+  const dates = Object.keys(data).sort();
+  const byPlayer = new Map();
+  let maxRank = 1;
+  dates.forEach((d, i) => (data[d].predictions || []).forEach(r => {
+    if (r.filt_mvp_rank == null) return;
+    maxRank = Math.max(maxRank, r.filt_mvp_rank);
+    if (!byPlayer.has(r.Player)) byPlayer.set(r.Player, new Array(dates.length).fill(null));
+    byPlayer.get(r.Player)[i] = { rank: r.filt_mvp_rank, share: r.pred_mvp_share, team: r.Team };
+  }));
+  if (!byPlayer.size) { el.hidden = true; return; }
+
+  const NS = "http://www.w3.org/2000/svg";
+  const colW = 110, padL = 195, padR = 170, padT = 50, padB = 40, rowH = 46;
+  const W = padL + padR + Math.max(1, dates.length - 1) * colW;
+  const H = padT + padB + (maxRank - 1) * rowH;
+  const x = i => padL + i * colW;
+  const y = r => padT + (r - 1) * rowH;
+  const shortDate = d => new Date(d + "T12:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" });
+
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("width", W); svg.setAttribute("height", H);
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  const add = (parent, tag, attrs, text) => {
+    const n = document.createElementNS(NS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    if (text != null) n.textContent = text;
+    parent.appendChild(n); return n;
+  };
+
+
+  for (let r = 1; r <= maxRank; r++) {
+    add(svg, "line", { x1: 40, x2: W - 40, y1: y(r), y2: y(r), stroke: "var(--line)", "stroke-dasharray": "2 4" });
+    add(svg, "text", { x: 14, y: y(r) + 4, class: "axis" }, "#" + r);
+  }
+  dates.forEach((d, i) => {
+    add(svg, "line", { x1: x(i), x2: x(i), y1: padT - 22, y2: H - padB + 12, stroke: "var(--line)" });
+    add(svg, "text", { x: x(i), y: padT - 30, "text-anchor": "middle", class: "axis" }, shortDate(d));
+    add(svg, "text", { x: x(i), y: H - 10, "text-anchor": "middle", class: "axis" }, shortDate(d));
+  });
+
+
+  [...byPlayer.entries()].forEach(([name, pts], idx) => {
+    const color = `hsl(${(idx * 137.5) % 360} 62% 46%)`;
+    const g = add(svg, "g", { class: "pl" });
+    g.addEventListener("mouseenter", () => { if (!svg.dataset.pin) { svg.classList.add("dim"); g.classList.add("on"); } });
+    g.addEventListener("mouseleave", () => { if (!svg.dataset.pin) { svg.classList.remove("dim"); g.classList.remove("on"); } });
+    g.addEventListener("click", () => {
+      const pinned = svg.dataset.pin === name;
+      svg.querySelectorAll(".pl.on").forEach(n => n.classList.remove("on"));
+      if (pinned) { delete svg.dataset.pin; svg.classList.remove("dim"); }
+      else { svg.dataset.pin = name; svg.classList.add("dim"); g.classList.add("on"); }
+    });
+
+
+    const runs = []; let cur = [];
+    pts.forEach((p, i) => { if (p) cur.push(i); else if (cur.length) { runs.push(cur); cur = []; } });
+    if (cur.length) runs.push(cur);
+
+    runs.forEach(run => {
+      if (run.length > 1) {
+        add(g, "polyline", { points: run.map(i => `${x(i)},${y(pts[i].rank)}`).join(" "),
+          fill: "none", stroke: color, "stroke-width": 3, "stroke-linejoin": "round", "stroke-linecap": "round" });
+      }
+      const first = run[0], last = run[run.length - 1];
+      const label = (i, mode) => {
+        const yy = y(pts[i].rank);
+        if (mode === "left")  add(g, "text", { x: x(i) - 18, y: yy + 4, "text-anchor": "end", class: "lbl" }, name);
+        if (mode === "right") add(g, "text", { x: x(i) + 18, y: yy + 4, "text-anchor": "start", class: "lbl" }, name);
+        if (mode === "above") add(g, "text", { x: x(i), y: yy - 17, "text-anchor": "middle", class: "lbl" }, name);
+      };
+
+      const lastIdx = dates.length - 1;
+      if (first === last) {
+        label(first, first === 0 && lastIdx > 0 ? "left" : first === lastIdx ? "right" : "above");
+      } else {
+        label(first, first === 0 ? "left" : "above");
+        label(last, last === lastIdx ? "right" : "above");
+      }
+    });
+
+    pts.forEach((p, i) => {
+      if (!p) return;
+      const c = add(g, "circle", { cx: x(i), cy: y(p.rank), r: 11, fill: color, stroke: "var(--card)", "stroke-width": 2 });
+      const share = typeof p.share === "number" ? ` · ${(p.share * 100).toFixed(1)}% share` : "";
+      add(c, "title", {}, `${name} (${p.team || ""})\n${dates[i]}: #${p.rank}${share}`);
+      add(g, "text", { x: x(i), y: y(p.rank) + 4, "text-anchor": "middle", class: "rk" }, p.rank);
+    });
+  });
+
+  el.hidden = false;
+  el.innerHTML = `<h2>Weekly Predictions <small>${byPlayer.size} players · top ${maxRank}</small></h2>
+    <div class="scroll"></div>`;
+  el.querySelector(".scroll").appendChild(svg);
+}
+
+function render(data) {
+    const dates = Object.keys(data).sort().reverse();
+    const nav = document.getElementById("nav");
+    const main = document.getElementById("main");
+    nav.innerHTML = "<a href='#trend'>Rank chart</a>";
+    const sel = document.createElement("select");
+    sel.innerHTML = "<option value=''>Jump to date…</option>";
+    sel.addEventListener("change", () => {
+    if (!sel.value) return;
+    document.getElementById("d-" + sel.value).scrollIntoView({ behavior: "smooth" });
+    sel.selectedIndex = 0;
+    });
+    nav.appendChild(sel);main.innerHTML = "";
+    renderTrend(data);
+
+  for (const date of dates) {
+    const entry = data[date];
+    const rows = (entry.predictions || []).slice().sort((a, b) => (a.filt_mvp_rank ?? 1e9) - (b.filt_mvp_rank ?? 1e9));
+    sel.add(new Option(date, date));
+
+    const keys = [];
+    rows.forEach(r => Object.keys(r).forEach(k => { if (!keys.includes(k)) keys.push(k); }));
+    const known = Object.keys(COLS);
+    const cols = [...FIRST.filter(k => keys.includes(k)),
+                  ...known.filter(k => !FIRST.includes(k) && keys.includes(k)),
+                  ...keys.filter(k => !known.includes(k))];
+
+    const maxShare = Math.max(1, ...rows.map(r => Number(r.pred_mvp_share) || 0));
+    const sec = document.createElement("section");
+    sec.id = "d-" + date;
+    const extra = entry.filter_bool != null ? `Filter (> 10 PPG, > 0.420 Team Win %, > 20 PER): ${entry.filter_bool ? "ON (20 game threshold reached)" : "OFF (yet to reach 20 game threshold)"}` : "";
+
+    let html = `<h2>${esc(prettyDate(date))} <small>${extra ? extra : ""}</small></h2>
+      <div class="scroll"><table><thead><tr>`;
+    for (const c of cols) {
+      const def = COLS[c] || {};
+      html += `<th title="${esc(def.title || def.label || c)}" class="${(def.cls || "").includes("l") && !(def.cls||"").includes("share") ? "l" : ""}">${esc(def.label || c)}</th>`;
+    }
+    html += "</tr></thead><tbody>";
+    for (const r of rows) {
+  html += "<tr>";
+  for (const c of cols) {
+    const def = COLS[c] || {};
+    const v = r[c];
+    const txt = v == null ? "" : (def.fmt && typeof v === "number" ? def.fmt(v) : esc(v));
+
+    if (c === "Team" && v != null) {                                   
+      html += `<td class="l" title="${esc(v)}">${esc(TEAM_ABBR[v] || v)}</td>`;
+    } else if (c === "pred_mvp_share" && typeof v === "number") {
+      html += `<td class="share"><div class="bar" style="width:${(v / maxShare * 100).toFixed(1)}%"></div><span>${txt}</span></td>`;
+    } else {
+      html += `<td class="${def.cls || ""}">${txt}</td>`;
+    }
+  }
+  html += "</tr>";
+}
+    html += "</tbody></table></div>";
+    sec.innerHTML = html;
+    main.appendChild(sec);
+  }
+  document.getElementById("status").textContent =
+    `${dates.length} date${dates.length === 1 ? "" : "s"} · latest ${dates[0]}`;
+  document.getElementById("fallback").hidden = true;
+}
+
+async function load() {
+  try {
+    const res = await fetch(DATA_URL, { cache: "no-store" });
+    if (!res.ok) throw new Error(res.status);
+    render(await res.json());
+  } catch (e) {
+    document.getElementById("status").textContent = "No data loaded";
+    document.getElementById("fallback").hidden = false;
+  }
+}
+document.getElementById("file").addEventListener("change", async e => {
+  const f = e.target.files[0];
+  if (f) render(JSON.parse(await f.text()));
+});
+const root = document.documentElement;
+const toggle = document.getElementById("theme-toggle");
+
+function setTheme(t) {
+  root.dataset.theme = t;
+  toggle.textContent = t === "dark" ? "☀️" : "🌙";
+  try { localStorage.setItem("theme", t); } catch (e) {}
+}
+
+let saved = null;
+try { saved = localStorage.getItem("theme"); } catch (e) {}
+setTheme(saved || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
+
+toggle.addEventListener("click", () =>
+  setTheme(root.dataset.theme === "dark" ? "light" : "dark"));
+load();
+</script>
+</body>
+</html>
